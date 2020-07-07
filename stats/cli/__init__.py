@@ -1,0 +1,1 @@
+"""Stats Command Line Interface."""
