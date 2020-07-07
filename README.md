@@ -1,11 +1,13 @@
 <div align="center">
   
-  <img src="https://res.cloudinary.com/ix-48/image/upload/v1594107881/logo-wide-light.svg" />
+  <img src="https://res.cloudinary.com/ix-48/image/upload/v1594108320/logo-wide-light.svg" />
 
   <br/>
-  <h3 style="color: #808080; font-style:italic;">
-  WORK IN PROGRESS
-  </h3>
+  <div style="color: #808080; font-style:italic;">
+    <h3>
+      WORK IN PROGRESS
+    </h3>
+  </div>
 
 </div>
 
