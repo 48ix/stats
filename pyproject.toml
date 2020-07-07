@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "48ix-stats"
 version = "0.0.1"
-description = "48-IX Statistics API"
+description = "48 IX Statistics API"
 authors = ["checktheroads <matt@48ix.net>"]
 license = "MIT"
 
