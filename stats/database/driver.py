@@ -35,6 +35,7 @@ class Influx(BaseHttpClient):
         self.measurement = None
         self.granularity = 10
         self.group_by = None
+        self.fill = None
 
     async def _parse(self, response):
         try:
@@ -86,17 +87,24 @@ class Influx(BaseHttpClient):
         if self.group_by:
             query.append(self.group_by)
 
+        if self.fill:
+            query.append(self.fill)
+
         query_string = " ".join(str(i) for i in query)
 
-        self.log.info(query_string)
         return query_string
 
-    async def query(self):
+    async def query(self, raw=False):
         """Execute the query."""
         await self.running()
-        response = await self._aget(
-            "query", params={"q": self._build_query(), "db": self.database}
-        )
+        if raw:
+            query = raw
+        else:
+            query = self._build_query()
+
+        self.log.info(query)
+        response = await self._aget("query", params={"q": query, "db": self.database})
+
         return await self._parse(response)
 
     def SELECT(self, *selections):
@@ -143,4 +151,9 @@ class Influx(BaseHttpClient):
         group = intersperse(group, ",")
         group.insert(0, "GROUP BY")
         self.group_by = " ".join(group)
+        return self
+
+    def FILL(self, item):
+        """Set 'FILL' function."""
+        self.fill = f"FILL({item})"
         return self
