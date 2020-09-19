@@ -33,6 +33,7 @@ def aiorun(coro, *args, **kwargs):
 @option("-d", "--direction", required=True, help="In or Out")
 def port_utilization(port_id, time, direction):
     """Get utilization statistics for a port."""
+    # Project
     from stats.actions.utilization import port_utilization_period
 
     echo(
@@ -48,6 +49,7 @@ def port_utilization(port_id, time, direction):
 @option("-d", "--direction", required=True, help="In or Out")
 def port_average(port_id, time, direction):
     """Get utilization statistics for a port."""
+    # Project
     from stats.actions.utilization import port_average_period
 
     echo(aiorun(port_average_period, port_id=port_id, period=time, direction=direction))
@@ -59,6 +61,7 @@ def port_average(port_id, time, direction):
 @option("-d", "--debug", default=False, is_flag=True, help="Enable debugging")
 def start(listen_address, listen_port, debug):
     """Start the Stats REST API."""
+    # Project
     from stats.api.main import start as api_start
 
     echo("Starting stats API on {}:{}...", listen_address, listen_port)

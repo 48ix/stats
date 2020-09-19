@@ -20,6 +20,7 @@ def intersperse(lst, item):
 
 def make_repr(_class):
     """Create a user-friendly represention of an object."""
+    # Standard Library
     from asyncio import iscoroutine
 
     def _process_attrs(_dir):

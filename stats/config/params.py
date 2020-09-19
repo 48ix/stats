@@ -4,6 +4,13 @@
 from pydantic import BaseModel, StrictInt, StrictStr, StrictBool, IPvAnyAddress
 
 
+class PolicyServer(BaseModel):
+    """Routing Policy Management Parameters."""
+
+    host: StrictStr
+    port: StrictInt = 4801
+
+
 class DatabaseServer(BaseModel):
     """InfluxDB validation model."""
 
@@ -41,3 +48,4 @@ class Params(BaseModel):
     api: Api = Api()
     listen_address: IPvAnyAddress = "::1"
     listen_port: StrictInt = 8001
+    policy_server: PolicyServer
