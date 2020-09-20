@@ -5,23 +5,34 @@ from typing import Optional
 
 # Third Party
 from fastapi import Header, BackgroundTasks
-from fastapi.exceptions import HTTPException
 
 # Project
 from stats.log import log
-from stats.auth.main import get_job, create_job, authenticate_user
+from stats.auth.main import get_job, create_job, authorize_route, authenticate_user
+from stats.exceptions import AuthError
 from stats.actions.policy import _update_policy
 from stats.models.update_policy import UpdatePolicyResponse
 
 
-async def verify_auth(username: str, password: str) -> bool:
-    """Verify a username & password combination is valid."""
-    if not all((username, password)):
-        raise HTTPException(401)
+async def verify_auth(username: str, password: str, route: str) -> bool:
+    """Authenticate & authorize a user.
+
+    Verifies the proper headers are provided, authenticates the username
+    & password, and authorizes the route.
+    """
+    has_headers = all((username, password))
     authenticated = await authenticate_user(username=username, password=password)
-    if not authenticated:
-        raise HTTPException(401)
-    return authenticated
+    authorized = await authorize_route(username, route)
+    full_auth = all((has_headers, authenticated, authorized))
+
+    if not full_auth:
+        raise AuthError(
+            "Authentication or authorization failed for user '{user}'",
+            user=username,
+            status_code=401,
+        )
+
+    return full_auth
 
 
 async def update_policy(
@@ -30,7 +41,7 @@ async def update_policy(
     x_48ix_api_key: Optional[str] = Header(None),
 ):
     """Initiate a manual policy update."""
-    await verify_auth(x_48ix_api_user, x_48ix_api_key)
+    await verify_auth(x_48ix_api_user, x_48ix_api_key, "/policy/update/")
 
     job = await create_job(requestor=x_48ix_api_user)
     await job.fetch_related("requestor")
@@ -52,7 +63,7 @@ async def policy_status(
     x_48ix_api_key: Optional[str] = Header(None),
 ):
     """Get the status of a policy update by job ID."""
-    await verify_auth(x_48ix_api_user, x_48ix_api_key)
+    await verify_auth(x_48ix_api_user, x_48ix_api_key, "/policy/update/*")
     job = await get_job(job_id)
     await job.fetch_related("requestor")
 
