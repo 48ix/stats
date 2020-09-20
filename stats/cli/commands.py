@@ -102,4 +102,43 @@ def create_api_user():
     )
 
 
+@main.command()
+@argument("route")
+def create_api_route(route):
+    """Create an API Route."""
+
+    # Project
+    from stats.auth.main import authdb_stop, authdb_start, create_route
+
+    async def _create(_route):
+        await authdb_start()
+        await create_route(_route)
+        await authdb_stop()
+
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(_create(route))
+
+    echo("Generated API Route {}", route)
+
+
+@main.command()
+@argument("route")
+@argument("username")
+def route_to_user(route, username):
+    """Associate a route with a username."""
+
+    # Project
+    from stats.auth.main import authdb_stop, authdb_start, associate_route
+
+    async def _create(_route, _user):
+        await authdb_start()
+        await associate_route(_user, [_route])
+        await authdb_stop()
+
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(_create(route, username))
+
+    echo("Associated Route {} with user {}", route, username)
+
+
 cli = CommandCollection(sources=[main])
