@@ -18,7 +18,7 @@ from stats.auth.models import ApiJob, ApiUser, ApiRoute
 
 async def authdb_start() -> None:
     """Initialize database connection."""
-    log.info("Opening database connection")
+    log.debug("Opening database connection")
     await Tortoise.init(
         db_url=f"sqlite:///{str(params.api.dbmain_path)}",
         modules={"models": ["stats.auth.models"]},
@@ -28,7 +28,7 @@ async def authdb_start() -> None:
 
 async def authdb_stop() -> None:
     """Close database connection."""
-    log.info("Closing database connection")
+    log.debug("Closing database connection")
     await Tortoise.close_connections()
 
 
