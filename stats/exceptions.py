@@ -117,3 +117,9 @@ class AuthError(_UnFmtError):
     """Raised for Authentication & Authorization Errors."""
 
     _level = "danger"
+    _status_code = 401
+
+    def __init__(self, *args, **kwargs):
+        """Set status code."""
+        super().__init__(*args, **kwargs)
+        self.status_code = kwargs.get("status_code", self._status_code)

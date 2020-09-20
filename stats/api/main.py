@@ -11,6 +11,7 @@ from stats.util import parse_port_id
 from stats.config import params
 from stats.api.events import startup_authdb, shutdown_authdb
 from stats.api.policy import policy_status, update_policy
+from stats.exceptions import AuthError, StatsError
 from stats.actions.utilization import (
     port_average_range,
     port_average_period,
@@ -32,6 +33,19 @@ api = FastAPI(
     redoc_url="/docs",
     default_response_class=JSONResponse,
 )
+
+
+@api.exception_handler(StatsError)
+async def handle_app_error(request, exc):
+    """Handle custom StatsError Exception."""
+    return JSONResponse({"error": str(exc)}, 500)
+
+
+@api.exception_handler(AuthError)
+async def handle_auth_error(request, exc):
+    """Handle custom AuthError Exception."""
+    return JSONResponse({"error": str(exc)}, exc.status_code)
+
 
 api.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
