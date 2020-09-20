@@ -4,7 +4,7 @@
 import asyncio
 
 # Third Party
-from click import CommandCollection, group, option, argument
+from click import CommandCollection, group, option, prompt, argument
 
 # Project
 from stats.cli.echo import Echo
@@ -69,6 +69,37 @@ def start(listen_address, listen_port, debug):
         api_start(host=listen_address, port=listen_port, debug=debug)
     except Exception:
         echo.console.print_exception()
+
+
+@main.command()
+def create_api_user():
+    """Create an API User."""
+
+    # Standard Library
+    import secrets
+
+    # Project
+    from stats.auth.main import authdb_stop, create_user, authdb_start
+
+    async def _create(_user, _key):
+        await authdb_start()
+        await create_user(_user, _key)
+        await authdb_stop()
+
+    username = prompt("Username", type=str)
+    key = secrets.token_urlsafe(16)
+
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(_create(username, key))
+
+    echo(
+        """Generated API User:
+  Username: {}
+  API Key: {}
+    """,
+        username,
+        key,
+    )
 
 
 cli = CommandCollection(sources=[main])
