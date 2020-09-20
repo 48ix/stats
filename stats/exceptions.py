@@ -111,3 +111,9 @@ class _PredefinedError(StatsError):
 
 class ConfigError(_UnFmtError):
     """Raised for generic user-config issues."""
+
+
+class AuthError(_UnFmtError):
+    """Raised for Authentication & Authorization Errors."""
+
+    _level = "danger"
