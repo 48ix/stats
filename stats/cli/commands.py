@@ -103,6 +103,25 @@ def create_api_user():
 
 
 @main.command()
+@argument("username")
+def delete_api_user(username):
+    """Delete an API User."""
+
+    # Project
+    from stats.auth.main import authdb_stop, delete_user, authdb_start
+
+    async def _coro(_user):
+        await authdb_start()
+        await delete_user(_user)
+        await authdb_stop()
+
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(_coro(username))
+
+    echo("Deleted user {}", username)
+
+
+@main.command()
 @argument("route")
 def create_api_route(route):
     """Create an API Route."""
@@ -123,22 +142,53 @@ def create_api_route(route):
 
 @main.command()
 @argument("route")
+def delete_api_route(route):
+    """Delete an API User."""
+
+    # Project
+    from stats.auth.main import authdb_stop, authdb_start, delete_route
+
+    async def _coro(_route):
+        await authdb_start()
+        await delete_route(_route)
+        await authdb_stop()
+
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(_coro(route))
+
+    echo("Deleted route {}", route)
+
+
+@main.command()
+@argument("route")
 @argument("username")
-def route_to_user(route, username):
+@option("--delete", is_flag=True, default=False, help="Delete the association")
+def route_to_user(route, username, delete):
     """Associate a route with a username."""
 
     # Project
-    from stats.auth.main import authdb_stop, authdb_start, associate_route
+    from stats.auth.main import (
+        authdb_stop,
+        authdb_start,
+        associate_route,
+        disassociate_route,
+    )
+
+    coro = associate_route
+    msg = "Associated Route {} with User {}"
+    if delete:
+        coro = disassociate_route
+        msg = "Disassociated Route {} with User {}"
 
     async def _create(_route, _user):
         await authdb_start()
-        await associate_route(_user, [_route])
+        await coro(_user, _route)
         await authdb_stop()
 
     loop = asyncio.new_event_loop()
     loop.run_until_complete(_create(route, username))
 
-    echo("Associated Route {} with user {}", route, username)
+    echo(msg, route, username)
 
 
 cli = CommandCollection(sources=[main])
