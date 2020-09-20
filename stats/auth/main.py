@@ -37,7 +37,9 @@ async def get_user(username: str) -> ApiUser:
     try:
         user = await ApiUser.get(username=username)
     except DoesNotExist:
-        raise AuthError("User '{u}' does not exist.", u=username) from None
+        raise AuthError(
+            "User '{u}' does not exist.", u=username, status_code=404
+        ) from None
     return user
 
 
@@ -62,9 +64,18 @@ async def create_user(username: str, password: str) -> None:
     try:
         await ApiUser.create(username=username, password=hashed_password)
     except IntegrityError:
-        raise AuthError("User '{u}' already exists.", u=username) from None
+        raise AuthError(
+            "User '{u}' already exists.", u=username, status_code=409
+        ) from None
 
     log.success("Added user {}", username)
+
+
+async def delete_user(username) -> None:
+    """Delete an API user."""
+    user = await get_user(username)
+    await user.delete()
+    log.success("Deleted user {}", username)
 
 
 async def create_route(name: str) -> None:
@@ -74,6 +85,13 @@ async def create_route(name: str) -> None:
     except IntegrityError:
         raise StatsError(f"Route '{name}' already exists") from None
     log.success("Added route {}", name)
+
+
+async def delete_route(route) -> None:
+    """Delete an API route."""
+    _route = await get_route(route)
+    await _route.delete()
+    log.success("Deleted route {}", route)
 
 
 async def create_job(requestor: str) -> ApiJob:
@@ -96,17 +114,38 @@ async def complete_job(job_id: int) -> None:
     )
 
 
-async def associate_route(username: str, routes: Union[str, List[str]]) -> None:
-    """Add routes to a user."""
+async def _change_route(
+    username: str, routes: Union[str, List[str]], action: str
+) -> None:
+    """Associate or disassociate a route from a user."""
     user = await get_user(username)
 
     if isinstance(routes, str):
         routes = [routes]
 
+    if action == "add":
+        coro = user.routes.add
+        msg = "Added route {} to user {}"
+    elif action == "remove":
+        coro = user.routes.remove
+        msg = "Removed route {} from user {}"
+    else:
+        raise StatsError(f"Action {action} is not supported")
+
     for route in routes:
         matched = await get_route(route)
-        await user.routes.add(matched)
-        log.success("Added route {} to user {}", route, user.username)
+        await coro(matched)
+        log.success(msg, route, user.username)
+
+
+async def associate_route(username: str, routes: Union[str, List[str]]) -> None:
+    """Add routes to a user."""
+    await _change_route(username, routes, "add")
+
+
+async def disassociate_route(username: str, routes: Union[str, List[str]]) -> None:
+    """Remove routes from a user."""
+    await _change_route(username, routes, "remove")
 
 
 async def authorize_route(username: str, route: str) -> bool:
@@ -120,7 +159,9 @@ async def authorize_route(username: str, route: str) -> bool:
                 is_authorized = True
                 break
     except DoesNotExist:
-        raise AuthError("User '{u}' does not exist.", u=username) from None
+        raise AuthError(
+            "User '{u}' does not exist.", u=username, status_code=401
+        ) from None
 
     if is_authorized:
         log.debug("{} is authorized to access {}", username, route)
