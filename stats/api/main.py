@@ -1,4 +1,5 @@
 """API Routes & Configuration."""
+
 # Third Party
 from fastapi import FastAPI
 from starlette.responses import JSONResponse
@@ -8,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from stats.log import log
 from stats.util import parse_port_id
 from stats.config import params
+from stats.api.events import startup_authdb, shutdown_authdb
+from stats.api.policy import policy_status, update_policy
 from stats.actions.utilization import (
     port_average_range,
     port_average_period,
@@ -17,6 +20,7 @@ from stats.actions.utilization import (
     overall_utilization_max_period,
     overall_utilization_average_period,
 )
+from stats.models.update_policy import UpdatePolicyResponse
 from stats.models.port_utilization import PortUtilization
 from stats.models.overall_utilization import OverallUtilization
 
@@ -32,6 +36,9 @@ api = FastAPI(
 api.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
 )
+
+api.add_event_handler("startup", startup_authdb)
+api.add_event_handler("shutdown", shutdown_authdb)
 
 ASGI_PARAMS = {
     "host": str(params.listen_address),
@@ -103,6 +110,22 @@ api.add_api_route(
     endpoint=port_utilization,
     response_model=PortUtilization,
     methods=["GET", "OPTIONS"],
+)
+
+api.add_api_route(
+    path="/policy/update/",
+    endpoint=update_policy,
+    response_model=UpdatePolicyResponse,
+    methods=["POST"],
+    status_code=201,
+)
+
+api.add_api_route(
+    path="/policy/update/{job_id}",
+    endpoint=policy_status,
+    response_model=UpdatePolicyResponse,
+    methods=["GET"],
+    status_code=200,
 )
 
 

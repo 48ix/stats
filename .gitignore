@@ -1,3 +1,5 @@
+# Test DB
+*.db*
 test.py
 .DS_Store
 .idea

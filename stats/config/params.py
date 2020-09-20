@@ -1,7 +1,17 @@
 """Validation model for Stats configuration."""
 
 # Third Party
-from pydantic import BaseModel, StrictInt, StrictStr, StrictBool, IPvAnyAddress
+from pydantic import (
+    FilePath,
+    BaseModel,
+    StrictInt,
+    StrictStr,
+    StrictBool,
+    IPvAnyAddress,
+)
+
+# Project
+from stats.constants import DB_MAIN
 
 
 class PolicyServer(BaseModel):
@@ -38,6 +48,7 @@ class Api(BaseModel):
     title: StrictStr = "Stats API"
     description: StrictStr = "IX Statistics"
     default_period: StrictInt = 8
+    dbmain_path: FilePath = DB_MAIN
 
 
 class Params(BaseModel):
