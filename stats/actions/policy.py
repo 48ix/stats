@@ -26,7 +26,7 @@ async def _remote_call(method: str, job_id: int, job_name: str, *args, **kwargs)
         call = getattr(connection.root, method)
         result = call(*args, **kwargs)
 
-        if isinstance(result, Union[Sequence, Generator]):
+        if isinstance(result, (Sequence, Generator)):
             message = ", ".join(result)
         elif isinstance(result, str):
             message = result
