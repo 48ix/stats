@@ -10,7 +10,7 @@ from stats.log import log
 from stats.util import parse_port_id
 from stats.config import params
 from stats.api.events import startup_authdb, shutdown_authdb
-from stats.api.policy import policy_status, update_policy
+from stats.api.policy import job_status, update_acls, update_policy
 from stats.exceptions import AuthError, StatsError
 from stats.actions.utilization import (
     port_average_range,
@@ -135,8 +135,16 @@ api.add_api_route(
 )
 
 api.add_api_route(
-    path="/policy/update/{job_id}",
-    endpoint=policy_status,
+    path="/acls/update/",
+    endpoint=update_acls,
+    response_model=UpdatePolicyResponse,
+    methods=["POST"],
+    status_code=201,
+)
+
+api.add_api_route(
+    path="/job/{job_id}",
+    endpoint=job_status,
     response_model=UpdatePolicyResponse,
     methods=["GET"],
     status_code=200,
