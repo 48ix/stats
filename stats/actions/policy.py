@@ -2,7 +2,7 @@
 
 # Standard Library
 from socket import gaierror
-from typing import Union, Sequence, Generator
+from typing import Sequence, Generator
 
 # Third Party
 import rpyc
@@ -26,10 +26,10 @@ async def _remote_call(method: str, job_id: int, job_name: str, *args, **kwargs)
         call = getattr(connection.root, method)
         result = call(*args, **kwargs)
 
-        if isinstance(result, (Sequence, Generator)):
-            message = ", ".join(result)
-        elif isinstance(result, str):
+        if isinstance(result, str):
             message = result
+        elif isinstance(result, (Sequence, Generator)):
+            message = ", ".join(result)
         else:
             message = ""
 
