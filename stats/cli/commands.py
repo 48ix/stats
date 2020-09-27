@@ -174,21 +174,24 @@ def route_to_user(route, username, delete):
         disassociate_route,
     )
 
-    coro = associate_route
-    msg = "Associated Route {} with User {}"
-    if delete:
-        coro = disassociate_route
-        msg = "Disassociated Route {} with User {}"
+    try:
+        coro = associate_route
+        msg = "Associated Route {} with User {}"
+        if delete:
+            coro = disassociate_route
+            msg = "Disassociated Route {} with User {}"
 
-    async def _create(_route, _user):
-        await authdb_start()
-        await coro(_user, _route)
-        await authdb_stop()
+        async def _create(_route, _user):
+            await authdb_start()
+            await coro(_user, _route)
+            await authdb_stop()
 
-    loop = asyncio.new_event_loop()
-    loop.run_until_complete(_create(route, username))
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(_create(route, username))
 
-    echo(msg, route, username)
+        echo(msg, route, username)
+    except Exception as err:
+        echo(str(err))
 
 
 cli = CommandCollection(sources=[main])

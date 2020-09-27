@@ -36,10 +36,10 @@ async def get_user(username: str) -> ApiUser:
     """Get a user object by username."""
     try:
         user = await ApiUser.get(username=username)
-    except DoesNotExist:
+    except DoesNotExist as err:
         raise AuthError(
             "User '{u}' does not exist.", u=username, status_code=404
-        ) from None
+        ) from err
     return user
 
 
@@ -47,14 +47,18 @@ async def get_job(job_id: int) -> ApiJob:
     """Get a job object by id."""
     try:
         job = await ApiJob.get(id=job_id)
-    except DoesNotExist:
-        raise StatsError(f"Job {job_id} does not exist.") from None
+    except DoesNotExist as err:
+        raise StatsError(f"Job {job_id} does not exist.") from err
     return job
 
 
 async def get_route(route: str) -> ApiRoute:
     """Get a user object by username."""
-    return await ApiRoute.get(name=route)
+    try:
+        _route = await ApiRoute.get(name=route)
+    except DoesNotExist as err:
+        raise AuthError("Route '{r}' does not exist.", r=route) from err
+    return _route
 
 
 async def create_user(username: str, password: str) -> None:

@@ -15,7 +15,9 @@ class Echo:
         """Initialize Echo()."""
         self.console = Console()
 
-    def __call__(self, message, *args, **kwargs):  # noqa: C901
+    def __call__(  # noqa: C901 your mom is too complex
+        self, message, *args, error=False, **kwargs,
+    ):  # noqa: C901
         """Format message based on type."""
         try:
             to_print = message
@@ -24,11 +26,18 @@ class Echo:
                 message = message.decode()
 
             if isinstance(message, str):
+                color = "cyan"
+                if error:
+                    color = "red"
+
                 if args:
-                    fmt_args = (f"[bold cyan]{a}[/bold cyan]" for a in args)
+                    fmt_args = (f"[bold {color}]{a}[/bold {color}]" for a in args)
                     to_print = message.format(*fmt_args)
+
                 elif kwargs:
-                    fmt_args = {k: f"[bold cyan]{v}[/bold cyan]" for k, v in kwargs}
+                    fmt_args = {
+                        k: f"[bold {color}]{v}[/bold {color}]" for k, v in kwargs
+                    }
                     to_print = message.format(**fmt_args)
 
             elif isinstance(message, (list, tuple, Generator, dict)):
