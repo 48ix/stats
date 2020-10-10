@@ -47,7 +47,7 @@ async def port_average_period(port_id: str, direction: str, period: int, limit: 
         "SELECT mean(*) from ",
         f"(SELECT derivative(max(bytes{direction.title()}), 1s) * 8",
         f"FROM interfaces WHERE port_id='{port_id}' AND",
-        f"time > now() - {period}h GROUP BY time(1m) fill(previous))",
+        f"time > now() - {period}h GROUP BY time(1m) fill(previous)) LIMIT {limit}",
     )
     async with Influx("telegraf") as db:
         return await db.query(raw=" ".join(parts))
@@ -62,7 +62,7 @@ async def port_average_range(
         "SELECT mean(*) from ",
         f"(SELECT derivative(max(bytes{direction.title()}), 1s) * 8",
         f"FROM interfaces WHERE port_id='{port_id}' AND",
-        f"time >= '{start_time.to_rfc3339_string()}'",
+        f"time >= '{start_time.to_rfc3339_string()}' LIMIT {limit}",
     )
     if end:
         end_time = pendulum.parse(end, tz="UTC", strict=False)
@@ -82,6 +82,7 @@ async def overall_utilization_period(direction: str, period: int, limit: int):
             .LAST(period)
             .GROUP("port_id")
             .FILL("none")
+            .LIMIT(limit)
         )
         return await q.query()
 
@@ -92,7 +93,7 @@ async def overall_utilization_average_period(direction: str, period: int, limit:
         "SELECT mean(*) from ",
         f"(SELECT derivative(max(bytes{direction.title()}), 1s) * 8",
         "FROM interfaces WHERE",
-        f"time > now() - {period}h GROUP BY time(1m) fill(previous))",
+        f"time > now() - {period}h GROUP BY time(1m) fill(previous)) LIMIT {limit}",
     )
     async with Influx("telegraf") as db:
         return await db.query(raw=" ".join(parts))
@@ -104,7 +105,7 @@ async def overall_utilization_max_period(direction: str, period: int, limit: int
         "SELECT max(*) from ",
         f"(SELECT derivative(max(bytes{direction.title()}), 1s) * 8",
         "FROM interfaces WHERE",
-        f"time > now() - {period}h GROUP BY time(1m) fill(previous))",
+        f"time > now() - {period}h GROUP BY time(1m) fill(previous)) LIMIT {limit}",
     )
     async with Influx("telegraf") as db:
         return await db.query(raw=" ".join(parts))
