@@ -36,6 +36,7 @@ class Influx(BaseHttpClient):
         self.granularity = 10
         self.group_by = None
         self.fill = None
+        self.limit = None
 
     async def _parse(self, response):
         try:
@@ -89,6 +90,9 @@ class Influx(BaseHttpClient):
 
         if self.fill:
             query.append(self.fill)
+
+        if self.limit:
+            query.append(self.limit)
 
         query_string = " ".join(str(i) for i in query)
 
@@ -156,4 +160,9 @@ class Influx(BaseHttpClient):
     def FILL(self, item):
         """Set 'FILL' function."""
         self.fill = f"FILL({item})"
+        return self
+
+    def LIMIT(self, entries):
+        """Set 'LIMIT' for sampling."""
+        self.limit = f"LIMIT {entries}"
         return self

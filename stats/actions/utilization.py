@@ -7,7 +7,9 @@ import pendulum
 from stats.database.driver import Influx
 
 
-async def port_utilization_period(port_id: str, direction: str, period: int):
+async def port_utilization_period(
+    port_id: str, direction: str, period: int, limit: int
+):
     """Get port utilization by relative time period in hours."""
     async with Influx("telegraf") as db:
         q = (
@@ -17,11 +19,14 @@ async def port_utilization_period(port_id: str, direction: str, period: int):
             .WHERE(port_id=port_id)
             .GROUP("port_id", "participant_id")
             .FILL("none")
+            .LIMIT(limit)
         )
         return await q.query()
 
 
-async def port_utilization_range(port_id: str, direction: str, start: str, end=None):
+async def port_utilization_range(
+    port_id: str, direction: str, limit: int, start: str, end=None,
+):
     """Get port utilization by date range."""
     async with Influx("telegraf") as db:
         q = (
@@ -31,11 +36,12 @@ async def port_utilization_range(port_id: str, direction: str, start: str, end=N
             .WHERE(port_id=port_id)
             .GROUP("port_id", "participant_id")
             .FILL("none")
+            .LIMIT(limit)
         )
         return await q.query()
 
 
-async def port_average_period(port_id: str, direction: str, period: int):
+async def port_average_period(port_id: str, direction: str, period: int, limit: int):
     """Get port utilization average by relative time period in hours."""
     parts = (
         "SELECT mean(*) from ",
@@ -47,7 +53,9 @@ async def port_average_period(port_id: str, direction: str, period: int):
         return await db.query(raw=" ".join(parts))
 
 
-async def port_average_range(port_id: str, direction: str, start: str, end=None):
+async def port_average_range(
+    port_id: str, direction: str, limit: int, start: str, end=None
+):
     """Get port utilization average by date range."""
     start_time = pendulum.parse(start, tz="UTC", strict=False)
     parts = (
@@ -65,7 +73,7 @@ async def port_average_range(port_id: str, direction: str, start: str, end=None)
         return await db.query(raw=" ".join(parts))
 
 
-async def overall_utilization_period(direction: str, period: int):
+async def overall_utilization_period(direction: str, period: int, limit: int):
     """Get IX-wide utilization by relative time period in hours."""
     async with Influx("telegraf") as db:
         q = (
@@ -78,7 +86,7 @@ async def overall_utilization_period(direction: str, period: int):
         return await q.query()
 
 
-async def overall_utilization_average_period(direction: str, period: int):
+async def overall_utilization_average_period(direction: str, period: int, limit: int):
     """Get IX-wide utilization average by relative time period in hours."""
     parts = (
         "SELECT mean(*) from ",
@@ -90,7 +98,7 @@ async def overall_utilization_average_period(direction: str, period: int):
         return await db.query(raw=" ".join(parts))
 
 
-async def overall_utilization_max_period(direction: str, period: int):
+async def overall_utilization_max_period(direction: str, period: int, limit: int):
     """Get IX-wide utilization peak by relative time period in hours."""
     parts = (
         "SELECT max(*) from ",

@@ -48,6 +48,7 @@ class Api(BaseModel):
     title: StrictStr = "Stats API"
     description: StrictStr = "IX Statistics"
     default_period: StrictInt = 8
+    default_limit: StrictInt = 100
     dbmain_path: FilePath = DB_MAIN
 
 

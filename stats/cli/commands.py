@@ -31,14 +31,19 @@ def aiorun(coro, *args, **kwargs):
 @argument("port-id")
 @option("-t", "--time", help="Number of previous hours to query")
 @option("-d", "--direction", required=True, help="In or Out")
-def port_utilization(port_id, time, direction):
+@option("-l", "--limit", required=False, default=100, help="Number of entries")
+def port_utilization(port_id, time, direction, limit):
     """Get utilization statistics for a port."""
     # Project
     from stats.actions.utilization import port_utilization_period
 
     echo(
         aiorun(
-            port_utilization_period, port_id=port_id, period=time, direction=direction
+            port_utilization_period,
+            port_id=port_id,
+            period=time,
+            direction=direction,
+            limit=limit,
         )
     )
 
@@ -47,12 +52,21 @@ def port_utilization(port_id, time, direction):
 @argument("port-id")
 @option("-t", "--time", default=1, help="Number of previous hours to query")
 @option("-d", "--direction", required=True, help="In or Out")
-def port_average(port_id, time, direction):
+@option("-l", "--limit", required=False, default=100, help="Number of entries")
+def port_average(port_id, time, direction, limit):
     """Get utilization statistics for a port."""
     # Project
     from stats.actions.utilization import port_average_period
 
-    echo(aiorun(port_average_period, port_id=port_id, period=time, direction=direction))
+    echo(
+        aiorun(
+            port_average_period,
+            port_id=port_id,
+            period=time,
+            direction=direction,
+            limit=limit,
+        )
+    )
 
 
 @main.command()

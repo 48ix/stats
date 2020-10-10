@@ -66,16 +66,60 @@ async def port_utilization(
 ):
     """Get utilization statistics for a port."""
     if start is not None:
-        data_in = await port_utilization_range(port_id, "in", start, end)
-        data_out = await port_utilization_range(port_id, "out", start, end)
-        avg_in = await port_average_range(port_id, "in", start, end)
-        avg_out = await port_average_range(port_id, "out", start, end)
+        data_in = await port_utilization_range(
+            port_id=port_id,
+            direction="in",
+            start=start,
+            end=end,
+            limit=params.api.default_limit,
+        )
+        data_out = await port_utilization_range(
+            port_id=port_id,
+            direction="out",
+            start=start,
+            end=end,
+            limit=params.api.default_limit,
+        )
+        avg_in = await port_average_range(
+            port_id=port_id,
+            direction="in",
+            start=start,
+            end=end,
+            limit=params.api.default_limit,
+        )
+        avg_out = await port_average_range(
+            port_id=port_id,
+            direction="out",
+            start=start,
+            end=end,
+            limit=params.api.default_limit,
+        )
     else:
         period = period or params.api.default_period
-        data_in = await port_utilization_period(port_id, "in", period)
-        data_out = await port_utilization_period(port_id, "out", period)
-        avg_in = await port_average_period(port_id, "in", period)
-        avg_out = await port_average_period(port_id, "out", period)
+        data_in = await port_utilization_period(
+            port_id=port_id,
+            direction="in",
+            period=period,
+            limit=params.api.default_limit,
+        )
+        data_out = await port_utilization_period(
+            port_id=port_id,
+            direction="out",
+            period=period,
+            limit=params.api.default_limit,
+        )
+        avg_in = await port_average_period(
+            port_id=port_id,
+            direction="in",
+            period=period,
+            limit=params.api.default_limit,
+        )
+        avg_out = await port_average_period(
+            port_id=port_id,
+            direction="out",
+            period=period,
+            limit=params.api.default_limit,
+        )
 
     location, participant_id, _ = parse_port_id(port_id)
 
@@ -97,11 +141,21 @@ async def port_utilization(
 async def overall_utilization(period: int = None):
     """Get IX-Wide utilization statistics."""
     period = period or params.api.default_period
-    data_in = await overall_utilization_period(direction="in", period=period)
-    data_out = await overall_utilization_period(direction="out", period=period)
-    avg_in = await overall_utilization_average_period(direction="in", period=period)
-    avg_out = await overall_utilization_average_period(direction="out", period=period)
-    peak_in = await overall_utilization_max_period(direction="in", period=period)
+    data_in = await overall_utilization_period(
+        direction="in", period=period, limit=params.api.default_limit
+    )
+    data_out = await overall_utilization_period(
+        direction="out", period=period, limit=params.api.default_limit
+    )
+    avg_in = await overall_utilization_average_period(
+        direction="in", period=period, limit=params.api.default_limit
+    )
+    avg_out = await overall_utilization_average_period(
+        direction="out", period=period, limit=params.api.default_limit
+    )
+    peak_in = await overall_utilization_max_period(
+        direction="in", period=period, limit=params.api.default_limit
+    )
 
     return {
         "ingress": data_in.get("values", [[]]),
