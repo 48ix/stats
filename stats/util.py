@@ -1,6 +1,11 @@
 """Common utility functions."""
 # Standard Library
 import re
+from typing import Union
+from ipaddress import IPv4Address, IPv6Address
+
+# Project
+from stats.log import log
 
 
 def clean_keyname(keyname):
@@ -71,3 +76,34 @@ def parse_port_id(port_id):
     yield location
     yield int(participant_id)
     yield int(port_number)
+
+
+def cpu_count(multiplier: int = 0):
+    """Get server's CPU core count."""
+    # Standard Library
+    import multiprocessing
+
+    return multiprocessing.cpu_count() * multiplier
+
+
+def format_listen_address(listen_address: Union[IPv4Address, IPv6Address, str]) -> str:
+    """Format a listen_address for gunicorn."""
+    fmt = str(listen_address)
+
+    if isinstance(listen_address, str):
+        # Standard Library
+        from ipaddress import ip_address
+
+        try:
+            listen_address = ip_address(listen_address)
+        except ValueError as err:
+            log.error(err)
+            pass
+
+    if (
+        isinstance(listen_address, (IPv4Address, IPv6Address))
+        and listen_address.version == 6
+    ):
+        fmt = f"[{str(listen_address)}]"
+
+    return fmt

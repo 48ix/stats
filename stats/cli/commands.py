@@ -73,14 +73,22 @@ def port_average(port_id, time, direction, limit):
 @option("-a", "--listen-address", default="::1", help="HTTP Listen Address")
 @option("-p", "--listen-port", default=8001, help="HTTP Listen Port")
 @option("-d", "--debug", default=False, is_flag=True, help="Enable debugging")
-def start(listen_address, listen_port, debug):
+@option("--direct", is_flag=True, default=False, help="Bypass Gunicorn")
+def start(listen_address, listen_port, debug, direct):
     """Start the Stats REST API."""
     # Project
-    from stats.api.main import start as api_start
+    from stats.main import start as gunicorn_start
+    from stats.api.main import start as direct_start
 
-    echo("Starting stats API on {}:{}...", listen_address, listen_port)
+    mode = "(WSGI)"
+    if direct:
+        mode = "(Direct)"
+    echo("Starting stats API on {}:{} {}...", listen_address, listen_port, mode)
     try:
-        api_start(host=listen_address, port=listen_port, debug=debug)
+        if direct:
+            direct_start(host=listen_address, port=listen_port, debug=debug)
+        else:
+            gunicorn_start()
     except Exception:
         echo.console.print_exception()
 

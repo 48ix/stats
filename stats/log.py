@@ -3,6 +3,7 @@
 # Standard Library
 import os
 import sys
+import logging
 
 # Third Party
 from loguru import logger as _loguru_logger
@@ -31,6 +32,16 @@ def base_logger():
 
 
 log = base_logger()
+logging.addLevelName(25, "SUCCESS")
+
+
+def _log_success(self, message, *a, **kw):
+    """Add custom builtin logging handler for the success level."""
+    if self.isEnabledFor(25):
+        self._log(25, message, a, **kw)
+
+
+logging.Logger.success = _log_success
 
 
 def set_log_level(logger, debug):

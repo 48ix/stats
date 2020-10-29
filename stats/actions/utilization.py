@@ -6,6 +6,8 @@ import pendulum
 # Project
 from stats.database.driver import Influx
 
+# TODO: https://docs.influxdata.com/influxdb/v1.8/query_language/functions/#sample
+
 
 async def port_utilization_period(
     port_id: str, direction: str, period: int, limit: int
